@@ -2,6 +2,7 @@ package org.magadiflo.cliente.jaxrs;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
@@ -31,12 +32,39 @@ public class Main {
         System.out.println(response.getMediaType());
 
         System.out.println("================ LISTANDO ================");
+        listar(rootUri);
+
+        System.out.println("================ CREANDO ================");
+        Curso nuevoCurso = new Curso();
+        nuevoCurso.setNombre("Curso avanzado de GIT");
+        nuevoCurso.setDescripcion("Curso avanzado de GIT");
+        nuevoCurso.setDuracion(780D);
+        nuevoCurso.setInstructor("Andres Guzman");
+
+        Entity<Curso> entityHeader = Entity.entity(nuevoCurso, MediaType.APPLICATION_JSON);
+        curso = rootUri.request(MediaType.APPLICATION_JSON).post(entityHeader, Curso.class);
+        System.out.println(curso);
+        listar(rootUri);
+
+        System.out.println("================ EDITANDO ================");
+        Curso editarCurso = curso;
+        editarCurso.setNombre("Curso avanzado de GIT y GITHUB");
+        entityHeader = Entity.entity(editarCurso, MediaType.APPLICATION_JSON);
+        curso = rootUri.path("/" + curso.getId()).request(MediaType.APPLICATION_JSON).put(entityHeader, Curso.class);
+        System.out.println(curso);
+        listar(rootUri);
+
+        System.out.println("================ ELIMINANDO ================");
+        rootUri.path("/" + curso.getId()).request().delete();
+        listar(rootUri);
+    }
+
+    private static void listar(WebTarget rootUri) {
+        System.out.println("================ LISTA ACTUALIZADA ================");
         List<Curso> cursos = rootUri.request(MediaType.APPLICATION_JSON)
                 .get(Response.class)
-                .readEntity(new GenericType<List<Curso>>(){});
+                .readEntity(new GenericType<List<Curso>>() {
+                });
         cursos.forEach(System.out::println);
-
-
-
     }
 }
